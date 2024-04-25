@@ -2,15 +2,14 @@ import { z } from 'zod';
 
 // 'posts'
 export const postSchema = z.object({
-    id: z.number().int(),
     user_id: z.number().int(),
     content: z.string(),
     createdAt:z.date().default(new Date()),
     updatedAt: z.date().default(new Date()),
 });
-export type Post = z.infer<typeof postSchema>
+export type Post = z.infer<typeof postSchema & {id:number}>
 
-export interface FormatedPost{
+export type FormatedPost = {
     id:number,
     content:string,
     createdAt:Date,
@@ -40,5 +39,5 @@ export const userSquema = z.object({
     createdAt:z.date().default(new Date()),
     updatedAt:z.date().default(new Date()),
 })
-
-export type User = z.infer<typeof userSquema & {id:Number}>
+export type UserInfo =  z.infer<typeof userSquema>
+export type User = UserInfo & {id:number}

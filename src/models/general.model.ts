@@ -16,12 +16,16 @@ export type Query = z.infer< typeof querySchema >
 export interface Err{
     message?:string, 
     error:boolean,
-    status:number
+    status:number,
+    cause?:string,
+    code?:string ,
+    name?:string,
+    stack?:string
 }
 
-export interface Pagination{
+export type Pagination = {
     page:number,
-    pagesize:number,
+    pageSize:number,
     totalItems:number,
     totalPages:number,
     nextPage:string | null,
