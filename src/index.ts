@@ -1,6 +1,13 @@
 import express from "express";
+import envConfig from "./config/dotenv";
+import postRouter from "./routers/posts.route";
+import userRouter from "./routers/users.route";
 
-const app = express();
-const port = 5500;
+const app = express()
+app.use(express.json())
 
-app.listen(port, () => console.log(`Escuchando al puerto ${port}`));
+app.use(postRouter)
+app.use(userRouter)
+
+const port = envConfig.port
+app.listen(port, () => console.log(`Escuchando al puerto ${port}`))
