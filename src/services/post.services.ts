@@ -1,3 +1,4 @@
+import { Request, Response } from "express"
 /* 
 Parámetros Query:
 
@@ -29,6 +30,7 @@ Parámetros Query:
     "previousPage": null, 
   }
 }*/
+
 
 export const GetPostsCtr = async(req:Request, res:Response)=>{
 //todo
