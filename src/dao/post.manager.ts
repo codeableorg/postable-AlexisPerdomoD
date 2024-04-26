@@ -18,7 +18,7 @@ export default class PostManager{
                     COUNT(l.post_id) AS likesCount
                     FROM Posts AS p
                     INNER JOIN Users AS u ON p.user_id = u.id
-                    LEFT JOIN likes AS l ON p.id = l.post_id
+                    LEFT JOIN Likes AS l ON p.id = l.post_id
                     GROUP BY p.id, p.title, p.content, u.username
                     ORDER BY $1 $2 LIMIT $3 OFFSET $4
                     `,
@@ -29,7 +29,7 @@ export default class PostManager{
                 //post the user have wroten
                 SQLQuery.text += " AND u.username = $5;"
                 SQLQuery.values?.push(username)
-                response =  await client.query(SQLQuery)
+                 response =  await client.query(SQLQuery)
             }
             SQLQuery.text += ";"
             response =  await client.query(SQLQuery)

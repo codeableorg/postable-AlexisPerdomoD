@@ -9,5 +9,7 @@ app.use(express.json())
 app.use(postRouter)
 app.use(userRouter)
 
-const port = envConfig.port
+const port = envConfig.PORT
 app.listen(port, () => console.log(`Escuchando al puerto ${port}`))
+
+export default app

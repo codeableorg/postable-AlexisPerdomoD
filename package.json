@@ -7,7 +7,7 @@
     "dev": "nodemon src/index.ts",
     "build": "tsc",
     "start": "node build/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest"
   },
   "dependencies": {
     "dotenv": "^16.3.1",
@@ -20,8 +20,10 @@
     "@types/node": "^20.10.6",
     "@types/pg": "^8.10.9",
     "nodemon": "^3.0.2",
+    "supertest": "^7.0.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "^1.5.2"
   },
   "keywords": [],
   "author": "",

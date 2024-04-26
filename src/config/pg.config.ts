@@ -1,12 +1,14 @@
 import { Pool } from "pg";
 import dotenv from "./dotenv";
-
+const {PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID} = dotenv
 const pool = new Pool({
-    connectionString:dotenv.db,
-    application_name:"POSTABLE DEMO",
-    max:20,
-    connectionTimeoutMillis:2000
-})
+    host: PGHOST,
+    database: PGDATABASE,
+    user: PGUSER,
+    password: PGPASSWORD,
+    port: 5432,
+    ssl:true,
+  });
 // the pool will emit an error on behalf of any idle clients
 // it contains if a backend error or network partition happens
 pool.on('error', (err, _client) => {
@@ -20,7 +22,7 @@ const connectPG = async() =>{
         console.log("cliente conectado adecuadamente a la base de datos")
         return client
     } catch (error) {
-        console.log(error)
+        console.log(error)  
         process.exit(-1)
     }
 }

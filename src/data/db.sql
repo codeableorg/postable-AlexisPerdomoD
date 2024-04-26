@@ -1,34 +1,34 @@
 CREATE TABLE
-    users (
+    "Users" (
         id SERIAL PRIMARY KEY,
-        username VARCHAR(50) NOT NULL UNIQUE,
-        password VARCHAR(50) NOT NULL,
-        email VARCHAR(50) UNIQUE,
-        firstName VARCHAR(50),
-        lastName VARCHAR(50),
-        role VARCHAR(10) NOT NULL DEFAULT 'user',
-        createdAt TIMESTAMPTZ NOT NULL,
-        updatedAt TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+        "username" VARCHAR(50) NOT NULL UNIQUE,
+        "password" VARCHAR(50) NOT NULL,
+        "email" VARCHAR(50) UNIQUE,
+        "firstName" VARCHAR(50),
+        "lastName" VARCHAR(50),
+        "role" VARCHAR(10) NOT NULL DEFAULT 'user',
+        "createdAt" TIMESTAMPTZ NOT NULL,
+        "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
 CREATE TABLE
-    posts (
+    "Posts" (
         id SERIAL PRIMARY KEY,
-        user_id INT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-        content TEXT NOT NULL,
-        createdAt TIMESTAMPTZ NOT NULL,
-        updatedAt TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+        "user_id" INT NOT NULL REFERENCES "Users" (id) ON DELETE CASCADE,
+        "content" TEXT NOT NULL,
+        "createdAt" TIMESTAMPTZ NOT NULL,
+        "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
 CREATE TABLE
-    likes (
-        createdAt TIMESTAMPTZ NOT NULL,
-        user_id INT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-        post_id INT NOT NULL REFERENCES posts (id) ON DELETE CASCADE,
+    "Likes" (
+        "createdAt" TIMESTAMPTZ NOT NULL,
+        user_id INT NOT NULL REFERENCES "Users" (id) ON DELETE CASCADE,
+        post_id INT NOT NULL REFERENCES "Posts" (id) ON DELETE CASCADE,
         PRIMARY KEY (user_id, post_id)
     );
 
-CREATE INDEX idx_username ON users (username);
+CREATE INDEX idx_username ON "Users" (username);
 
 /*
 

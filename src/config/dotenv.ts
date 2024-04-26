@@ -1,10 +1,7 @@
 import {config} from "dotenv";
 
 config({
-    path:__dirname + ".env"
+    path:".env"
 })
-
-export default {
-    db: process.env.DB,
-    port:process.env.PORT
-}
+let { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID, PORT } = process.env;
+export default {PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID, PORT }
