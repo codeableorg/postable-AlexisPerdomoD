@@ -1,12 +1,12 @@
 CREATE TABLE
     "Users" (
         id SERIAL PRIMARY KEY,
-        "username" VARCHAR(50) NOT NULL UNIQUE,
-        "password" VARCHAR(50) NOT NULL,
-        "email" VARCHAR(50) UNIQUE,
-        "firstName" VARCHAR(50),
-        "lastName" VARCHAR(50),
-        "role" VARCHAR(10) NOT NULL DEFAULT 'user',
+        "username" VARCHAR(255) NOT NULL UNIQUE,
+        "password" VARCHAR(255) NOT NULL,
+        "email" VARCHAR(255) UNIQUE,
+        "firstName" VARCHAR(255),
+        "lastName" VARCHAR(255),
+        "role" VARCHAR(255) NOT NULL DEFAULT 'user',
         "createdAt" TIMESTAMPTZ NOT NULL,
         "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
     );

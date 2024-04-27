@@ -10,3 +10,5 @@ userRouter.post("/signup", createUserCtr)
 userRouter.post("/login",loginUserCtr)
 
 export default userRouter
+
+

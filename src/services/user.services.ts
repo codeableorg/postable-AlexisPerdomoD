@@ -1,5 +1,12 @@
 import { Request, Response } from "express";
-
+import factory from "../dao/factory";
+import { loginSchema, userSquema , TokenInfo, tokenInfoSchema, UserUpdates, userUpdatesSchema} from "../models/schemas.model";
+import { checkPass, signPass } from "../utiilities/bcrypt";
+import jwt, { JsonWebTokenError } from "jsonwebtoken";
+import dotenv from "../config/dotenv";
+import { Err } from "../models/general.model";
+import { ZodError } from "zod";
+const um = factory.um()
 /*
 
 GET /me (Ver Perfil de Usuario)
@@ -24,7 +31,69 @@ GET /me (Ver Perfil de Usuario)
     }
 
  */
-export const getUserCtr = async(req:Request, res:Response)=>{}//todo
+
+    const checkToken = (req:Request):TokenInfo | Err =>{
+        try {
+            let token = req.headers.authorization
+            if(!token)return{
+                error:true,
+                message:"Unauthorized",
+                status:401
+            }
+            token = token.split(" ")[1]
+            return tokenInfoSchema.parse(jwt.verify(token, dotenv.SECRET_TOKEN || ""))
+        } catch (error) {
+            if(error instanceof JsonWebTokenError){
+                return {
+                    error:true,
+                    message: error.message,
+                    cause: error.name,
+                    status:401
+                }
+            }else if(error instanceof ZodError)return{
+                    error:true,
+                    message: error.message,
+                    cause: error.name,
+                    status:400
+                }
+
+
+            return{
+                error:true,
+                message:"internar error server",
+                status:500
+            }
+        }
+    }
+export const getUserCtr = async(req:Request, res:Response)=>{
+    const currentUser:TokenInfo | Err = checkToken(req)
+    if("error" in currentUser)return res.status(currentUser.status).send({
+        error:currentUser.cause || "ERROR",
+        message: currentUser.message,
+    })
+
+    
+
+    const r = await um.getUser(currentUser.username)
+    if("error" in r)return res.status(r.status).send({
+        error:r.cause || "ERROR",
+        message: r.message,
+    })
+    const data ={
+        id:r.id,
+        username:r.username,
+        email: r.email || "",
+        lastName: r.lastName || "",
+        firstName: r.firstName || "",
+        createAt: r.createdAt,
+        updateAt: r.updatedAt
+      }
+    return res.send({
+        ok:true,
+        data
+    })
+
+}//todo
 /**PATCH /me (Editar Cuenta de Usuario)
     Descripción: Permite al usuario editar su información de perfil.
     Body:
@@ -46,7 +115,46 @@ export const getUserCtr = async(req:Request, res:Response)=>{}//todo
         "createdAt": "2024-01-19 10:37:16-08",
         "updatedAt": "2024-01-19 11:00:16-08"
       } */
-export const updateUserCtr = async(req:Request, res:Response)=>{}//todo
+export const updateUserCtr = async(req:Request, res:Response)=>{
+    const currentUser:TokenInfo | Err = checkToken(req)
+    if("error" in currentUser)return res.status(currentUser.status).send({
+        error:currentUser.cause || "ERROR",
+        message: currentUser.message,
+    })
+    //todo check if user exist , token could keep an username that already is not longer used 
+
+    const userUpdates = userUpdatesSchema.safeParse(req.body)
+    if(userUpdates.success === false){
+        return res.status(400).send({
+          name:userUpdates.error.name,
+          errors: userUpdates.error.errors.join(" "),
+          cause: userUpdates.error.cause,
+          message: userUpdates.error.message
+        })
+    }
+
+    const updates = userUpdates.data
+    if(updates.password)updates.password = signPass(updates.password)
+    const r = await um.updateUser(currentUser.username, updates)
+    if("error" in r)return res.status(r.status).send({
+        error:r.cause || "ERROR",
+        message: r.message,
+    })
+    const data ={
+        id:r.id,
+        username:r.username,
+        email: r.email || "",
+        lastName: r.lastName || "",
+        firstName: r.firstName || "",
+        createAt: r.createdAt,
+        updateAt: r.updatedAt
+      }
+    return res.send({
+        ok:true,
+        data
+    })
+}
+//todo
 /**
 DELETE /me (Eliminar Cuenta de Usuario)
 
@@ -61,7 +169,21 @@ DELETE /me (Eliminar Cuenta de Usuario)
     }
 
  */
-export const deleteUserCtr = async(req:Request, res:Response)=>{}//todo
+export const deleteUserCtr = async(req:Request, res:Response)=>{
+    const currentUser:TokenInfo | Err = checkToken(req)
+    if("error" in currentUser)return res.status(currentUser.status).send({
+        error:currentUser.cause || "ERROR",
+        message: currentUser.message,
+    })
+
+    const r = await um.deleteUser(currentUser.username)
+    if("error" in r)return res.status(r.status).send({
+        error:r.cause || "ERROR",
+        message: r.message,
+    })
+    return res.send(r)
+
+}//todo
 /**
 
 POST /signup (Crear Cuenta)
@@ -93,7 +215,42 @@ Ejemplo de Respuesta:
 }
 
  */
-export const createUserCtr = async(req:Request, res:Response)=>{}//todo
+export const createUserCtr = async(req:Request, res:Response)=>{
+  const newUserInfo = userSquema.safeParse(req.body)
+  if(newUserInfo.success === false){
+    return res.status(400).send({
+      name:newUserInfo.error.name,
+      errors: newUserInfo.error.errors.join(" "),
+      cause: newUserInfo.error.cause,
+      message: newUserInfo.error.message
+    })
+
+  }
+  newUserInfo.data.password = signPass(newUserInfo.data.password)
+
+  const newUser = await um.createUser(newUserInfo.data)
+  if("error" in newUser){
+    return res.status(newUser.status).send({
+      message: newUser.message || "something went wrong",
+      cause: newUser.code ? newUser.cause : "server internarl problem",
+      stack: newUser.stack
+    })
+  }
+  const data ={
+    id:newUser.id,
+    username:newUser.username,
+    email: newUser.email || "",
+    lastName: newUser.lastName || "",
+    firstName: newUser.firstName || "",
+    createAt: newUser.createdAt,
+    updateAt: newUser.updatedAt
+  }
+
+  return res.status(201).send({
+    ok:true,
+    data
+  })
+}
 /**
 
 POST /login (Iniciar Sesión)
@@ -114,4 +271,27 @@ POST /login (Iniciar Sesión)
     }
 
  */
-export const loginUserCtr = async(req:Request, res:Response)=>{}//todo
+export const loginUserCtr = async(req:Request, res:Response)=>{
+    const newLog = loginSchema.safeParse(req.body)
+    if(newLog.success === false){
+        return res.status(400).send({
+            name:newLog.error.name,
+            errors: newLog.error.errors.join(" "),
+            cause: newLog.error.cause,
+            message: newLog.error.message
+        })
+    }
+    const user = await um.getUser(newLog.data.username)
+    if("error" in user)return res.status(user.status).send(user)
+    if(!checkPass(newLog.data.password, user))return res.status(401).send({
+            error:"invalid credentials",
+            message:"there is incorrect password or username"
+        })
+   const ti:TokenInfo = {
+        username: user.username,
+        role: user.role
+    }
+    const secret =  dotenv.SECRET_TOKEN || ""
+    const data = jwt.sign(ti, secret, {expiresIn:"10h"})
+    return res.send({ok:true, data})
+}//todo

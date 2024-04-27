@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import {  z } from 'zod';
 
 // 'posts'
 export const postSchema = z.object({
@@ -39,8 +39,6 @@ export const userSquema = z.object({
     createdAt:z.date().default(new Date()),
     updatedAt:z.date().default(new Date()),
 })
-export type UserInfo =  z.infer<typeof userSquema>
-export type User = UserInfo & {id:number}
 
 export const userUpdatesSchema = z.object({
     username: z.string().max(50).optional(),
@@ -49,4 +47,15 @@ export const userUpdatesSchema = z.object({
     firstName: z.string().max(50).optional(),
     lastName:z.string().max(50).optional(),
 })
+export const loginSchema = z.object({
+    username:z.string().max(50),
+    password:z.string().regex(regex)
+})
+export const tokenInfoSchema =z.object({
+    username: z.string(),
+    role:z.enum(["admin", "user"])
+})
+export type TokenInfo = z.infer<typeof tokenInfoSchema>
 export type UserUpdates = Record<string, string | undefined> & z.infer<typeof userUpdatesSchema>
+export type UserInfo =  z.infer<typeof userSquema>
+export type User = UserInfo & {id:number}
