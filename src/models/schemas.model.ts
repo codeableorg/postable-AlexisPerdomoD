@@ -7,7 +7,8 @@ export const postSchema = z.object({
     createdAt:z.date().default(new Date()),
     updatedAt: z.date().default(new Date()),
 });
-export type Post = z.infer<typeof postSchema & {id:number}>
+export type PostInfo = z.infer<typeof postSchema>
+export type Post = PostInfo & {id:number}
 
 export type FormatedPost = {
     id:number,

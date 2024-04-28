@@ -1,4 +1,10 @@
 import { Request, Response } from "express"
+import { querySchema } from "../models/general.model"
+import factory from "../dao/factory"
+import { checkToken } from "../utiilities/checkToken"
+import { postSchema } from "../models/schemas.model"
+const pm = factory.pm()
+const um = factory.um()
 /* 
 Parámetros Query:
 
@@ -33,7 +39,23 @@ Parámetros Query:
 
 
 export const GetPostsCtr = async(req:Request, res:Response)=>{
-//todo
+    const querys = querySchema.safeParse(req.query)
+    if(querys.success === false){
+        return res.status(400).send({
+            name:querys.error.name,
+            errors: querys.error.errors.join(" "),
+            cause: querys.error.cause,
+            message: querys.error.message
+          })
+    }
+
+    const r = await pm.getPosts(querys.data)
+    if("error" in r)return res.status(r.status).send({
+        error:r.cause || r.name || "ERROR",
+        message: r.message,
+        status: r.status
+    })
+    return res.send(r)
 }
 
 /*
@@ -100,7 +122,38 @@ Respuesta:
   }
 }
  */
-export const createPostCtr = async(req:Request, res:Response)=>{}//todo
+export const createPostCtr = async(req:Request, res:Response)=>{
+
+    const currentUser = checkToken(req)
+    if("error" in currentUser)return res.status(currentUser.status).send({
+        error:currentUser.cause || "ERROR",
+        message: currentUser.message,
+    })
+    const u = await um.getUser(currentUser.username)
+    if("error" in u)return res.status(u.status).send({
+        error:u.cause || u.name || "ERROR",
+        message: u.message,
+    })
+
+    const postInfo = postSchema.safeParse({user_id:u.id, ...req.body})
+
+    if(postInfo.success === false){
+        return res.status(400).send({
+          name:postInfo.error.name,
+          errors: postInfo.error.errors.join(" "),
+          cause: postInfo.error.cause,
+          message: postInfo.error.message
+        })
+    }
+
+    const  r = await pm.createPost(postInfo.data, u.username)
+
+    if("error" in r)return res.status(r.status).send({
+        error:r.cause || r.name || "ERROR",
+        message: r.message
+    })
+    return res.send(r)
+}//todo
 
 /*PATCH /posts/:id (Editar Post Existente)
 

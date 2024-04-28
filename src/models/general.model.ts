@@ -4,8 +4,8 @@ import { FormatedPost } from "./schemas.model";
 
 
 export const querySchema = z.object({
-    page:z.number().min(1).default(1),
-    limit: z.number().min(1).default(10),
+    page:z.string().default("1"),
+    limit: z.string().default("10"),
     username: z.string().optional(),
     orderBy:z.enum(["createdAt", "likesCount"]).default("createdAt"),
     order:z.enum(["asc", "desc"]).default("asc")
@@ -26,12 +26,12 @@ export interface Err{
 export type Pagination = {
     page:number,
     pageSize:number,
-    totalItems:number,
+    totalItems:number | null,
     totalPages:number,
     nextPage:string | null,
     previusPage:string | null
 }
-export interface Response{
+export interface PostsResponse{
     ok:boolean,
     data: FormatedPost[],
     pagination: Pagination

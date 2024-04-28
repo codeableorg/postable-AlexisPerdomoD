@@ -10,9 +10,6 @@ app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(cookieP(dotenv.SECRET_COOKIE))
 
-app.get("/", (req, res)=>{
-    res.send("hola")
-})
 app.use(userRouter)
 app.use(postRouter)
 

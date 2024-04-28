@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
 import factory from "../dao/factory";
-import { loginSchema, userSquema , TokenInfo, tokenInfoSchema, UserUpdates, userUpdatesSchema} from "../models/schemas.model";
+import { loginSchema, userSquema , TokenInfo,userUpdatesSchema} from "../models/schemas.model";
 import { checkPass, signPass } from "../utiilities/bcrypt";
-import jwt, { JsonWebTokenError } from "jsonwebtoken";
 import dotenv from "../config/dotenv";
 import { Err } from "../models/general.model";
-import { ZodError } from "zod";
+
+import { checkToken } from "../utiilities/checkToken";
+import  jwt  from 'jsonwebtoken';
 const um = factory.um()
 /*
 
@@ -32,39 +33,7 @@ GET /me (Ver Perfil de Usuario)
 
  */
 
-    const checkToken = (req:Request):TokenInfo | Err =>{
-        try {
-            let token = req.headers.authorization
-            if(!token)return{
-                error:true,
-                message:"Unauthorized",
-                status:401
-            }
-            token = token.split(" ")[1]
-            return tokenInfoSchema.parse(jwt.verify(token, dotenv.SECRET_TOKEN || ""))
-        } catch (error) {
-            if(error instanceof JsonWebTokenError){
-                return {
-                    error:true,
-                    message: error.message,
-                    cause: error.name,
-                    status:401
-                }
-            }else if(error instanceof ZodError)return{
-                    error:true,
-                    message: error.message,
-                    cause: error.name,
-                    status:400
-                }
-
-
-            return{
-                error:true,
-                message:"internar error server",
-                status:500
-            }
-        }
-    }
+    
 export const getUserCtr = async(req:Request, res:Response)=>{
     const currentUser:TokenInfo | Err = checkToken(req)
     if("error" in currentUser)return res.status(currentUser.status).send({
@@ -292,6 +261,6 @@ export const loginUserCtr = async(req:Request, res:Response)=>{
         role: user.role
     }
     const secret =  dotenv.SECRET_TOKEN || ""
-    const data = jwt.sign(ti, secret, {expiresIn:"10h"})
+    const data = jwt.sign(ti, secret, {expiresIn:"1h"})
     return res.send({ok:true, data})
 }//todo
