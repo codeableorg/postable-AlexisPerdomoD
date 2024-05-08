@@ -1,7 +1,7 @@
 {
   "name": "express-app",
   "version": "1.0.0",
-  "description": "",
+  "description": "social media small simulator",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/index.ts",
@@ -16,6 +16,7 @@
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.11.3",
+    "winston": "^3.13.0",
     "zod": "^3.23.4"
   },
   "devDependencies": {
@@ -32,6 +33,6 @@
     "vitest": "^1.5.2"
   },
   "keywords": [],
-  "author": "",
+  "author": "Dropdibemol@gmail.com",
   "license": "ISC"
 }

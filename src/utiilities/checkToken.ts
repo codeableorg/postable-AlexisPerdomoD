@@ -2,7 +2,7 @@ import jwt, { JsonWebTokenError } from "jsonwebtoken"
 import { Err } from "../models/general.model"
 import { TokenInfo, tokenInfoSchema } from "../models/schemas.model"
 import { ZodError } from "zod"
-import dotenv from "../config/dotenv"
+import dotenv from "../config/dotenv.config"
 import { Request } from "express"
 
 export const checkToken = (req:Request):TokenInfo | Err =>{

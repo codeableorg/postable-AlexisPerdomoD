@@ -1,5 +1,6 @@
 import { Pool } from "pg";
-import dotenv from "./dotenv";
+import dotenv from "./dotenv.config";
+import logger from "./logger.config";
 const {PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID} = dotenv
 const pool = new Pool({
     host: PGHOST,
@@ -12,17 +13,17 @@ const pool = new Pool({
 // the pool will emit an error on behalf of any idle clients
 // it contains if a backend error or network partition happens
 pool.on('error', (err, _client) => {
-    console.error('Unexpected error on idle client', err)
+    logger.log("fatal", 'Unexpected error on idle client' + err)
     process.exit(-1)
   })
 
 const connectPG = async() =>{
     try {
         const client = await pool.connect()
-        console.log("cliente conectado adecuadamente a la base de datos")
+        logger.info("cliente conectado adecuadamente a la base de datos")
         return client
     } catch (error) {
-        console.log(error)  
+        logger.log("fatal" , error)  
         process.exit(-1)
     }
 }

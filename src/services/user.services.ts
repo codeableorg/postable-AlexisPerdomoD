@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import factory from "../dao/factory";
 import { loginSchema, userSquema , TokenInfo,userUpdatesSchema} from "../models/schemas.model";
 import { checkPass, signPass } from "../utiilities/bcrypt";
-import dotenv from "../config/dotenv";
+import dotenv from "../config/dotenv.config";
 import { Err } from "../models/general.model";
 
 import { checkToken } from "../utiilities/checkToken";
