@@ -3,6 +3,7 @@ import { querySchema } from "../models/general.model"
 import factory from "../dao/factory"
 import { checkToken } from "../utiilities/checkToken"
 import { postSchema } from "../models/schemas.model"
+import logger from "../config/logger.config"
 const pm = factory.pm()
 const um = factory.um()
 /* 
@@ -37,24 +38,33 @@ Parámetros Query:
   }
 }*/
 
-
-export const GetPostsCtr = async(req:Request, res:Response)=>{
+export const GetPostsCtr = async (req: Request, res: Response) => {
     const querys = querySchema.safeParse(req.query)
-    if(querys.success === false){
+    if (querys.success === false) {
         return res.status(400).send({
-            name:querys.error.name,
+            name: querys.error.name,
             errors: querys.error.errors.join(" "),
             cause: querys.error.cause,
-            message: querys.error.message
-          })
+            message: querys.error.message,
+        })
     }
 
     const r = await pm.getPosts(querys.data)
-    if("error" in r)return res.status(r.status).send({
-        error:r.cause || r.name || "ERROR",
-        message: r.message,
-        status: r.status
-    })
+    if ("error" in r) {
+        if (r.status === 500)
+            logger.log(
+                "fatal",
+                `${r.name || "Error"} 
+            ${r.message || "error without information"}
+            ${r.code || 0}
+            ${r.cause}`
+            )
+        return res.status(r.status).send({
+            error: r.cause || r.name || "ERROR",
+            message: r.message,
+            status: r.status,
+        })
+    }
     return res.send(r)
 }
 
@@ -94,8 +104,8 @@ Parámetros Query:
 }
  */
 // /:username
-export const GetPostCtr = async(req:Request, res:Response)=>{
-//todo
+export const GetPostCtr = async (req: Request, res: Response) => {
+    //todo
 }
 
 // POST /posts
@@ -122,38 +132,50 @@ Respuesta:
   }
 }
  */
-export const createPostCtr = async(req:Request, res:Response)=>{
-
+export const createPostCtr = async (req: Request, res: Response) => {
     const currentUser = checkToken(req)
-    if("error" in currentUser)return res.status(currentUser.status).send({
-        error:currentUser.cause || "ERROR",
-        message: currentUser.message,
-    })
+    if ("error" in currentUser)
+        return res.status(currentUser.status).send({
+            error: currentUser.cause || "ERROR",
+            message: currentUser.message,
+        })
     const u = await um.getUser(currentUser.username)
-    if("error" in u)return res.status(u.status).send({
-        error:u.cause || u.name || "ERROR",
-        message: u.message,
-    })
+    if ("error" in u)
+        return res.status(u.status).send({
+            error: u.cause || u.name || "ERROR",
+            message: u.message,
+        })
 
-    const postInfo = postSchema.safeParse({user_id:u.id, ...req.body})
+    const postInfo = postSchema.safeParse({ user_id: u.id, ...req.body })
 
-    if(postInfo.success === false){
+    if (postInfo.success === false) {
         return res.status(400).send({
-          name:postInfo.error.name,
-          errors: postInfo.error.errors.join(" "),
-          cause: postInfo.error.cause,
-          message: postInfo.error.message
+            name: postInfo.error.name,
+            errors: postInfo.error.errors.join(" "),
+            cause: postInfo.error.cause,
+            message: postInfo.error.message,
         })
     }
 
-    const  r = await pm.createPost(postInfo.data, u.username)
+    const r = await pm.createPost(postInfo.data, u.username)
 
-    if("error" in r)return res.status(r.status).send({
-        error:r.cause || r.name || "ERROR",
-        message: r.message
-    })
+    if ("error" in r) {
+        if (r.status === 500)
+            logger.log(
+                "fatal",
+                `${r.name || "error"} 
+            ${r.message || "error without information"}
+            ${r.code || 0}
+            ${r.cause}`
+            )
+        return res.status(r.status).send({
+            error: r.cause || r.name || "error",
+            message: r.message,
+            status: r.status,
+        })
+    }
     return res.send(r)
-}//todo
+} //todo
 
 /*PATCH /posts/:id (Editar Post Existente)
 
@@ -180,7 +202,7 @@ export const createPostCtr = async(req:Request, res:Response)=>{
   }
 }
  */
-export const updatePostCtr = async(req:Request, res:Response) =>{}//todo
+export const updatePostCtr = async (req: Request, res: Response) => {} //todo
 
 /**
 
@@ -208,4 +230,4 @@ POST /posts/:postId/like (Dar Like a un Post) (DELETE) para eliminar like
     }
 
  */
-    export const updateLikeCtr = async(req:Request, res:Response) =>{}//todo
+export const updateLikeCtr = async (req: Request, res: Response) => {} //todo

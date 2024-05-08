@@ -7,6 +7,7 @@ import { Err } from "../models/general.model";
 
 import { checkToken } from "../utiilities/checkToken";
 import  jwt  from 'jsonwebtoken';
+import logger from "../config/logger.config";
 const um = factory.um()
 /*
 
@@ -44,10 +45,21 @@ export const getUserCtr = async(req:Request, res:Response)=>{
     
 
     const r = await um.getUser(currentUser.username)
-    if("error" in r)return res.status(r.status).send({
-        error:r.cause || "ERROR",
-        message: r.message,
-    })
+    if ("error" in r) {
+        if (r.status === 500)
+            logger.log(
+                "fatal",
+                `${r.name || "error"} 
+            ${r.message || "error without information"}
+            ${r.code || 0}
+            ${r.cause}`
+            )
+        return res.status(r.status).send({
+            error: r.cause || r.name || "error",
+            message: r.message,
+            status: r.status,
+        })
+    }
     const data ={
         id:r.id,
         username:r.username,
@@ -105,10 +117,21 @@ export const updateUserCtr = async(req:Request, res:Response)=>{
     const updates = userUpdates.data
     if(updates.password)updates.password = signPass(updates.password)
     const r = await um.updateUser(currentUser.username, updates)
-    if("error" in r)return res.status(r.status).send({
-        error:r.cause || "ERROR",
-        message: r.message,
-    })
+    if ("error" in r) {
+        if (r.status === 500)
+            logger.log(
+                "fatal",
+                `${r.name || "error"} 
+            ${r.message || "error without information"}
+            ${r.code || 0}
+            ${r.cause}`
+            )
+        return res.status(r.status).send({
+            error: r.cause || r.name || "error",
+            message: r.message,
+            status: r.status,
+        })
+    }
     const data ={
         id:r.id,
         username:r.username,
@@ -146,10 +169,21 @@ export const deleteUserCtr = async(req:Request, res:Response)=>{
     })
 
     const r = await um.deleteUser(currentUser.username)
-    if("error" in r)return res.status(r.status).send({
-        error:r.cause || "ERROR",
-        message: r.message,
-    })
+    if ("error" in r) {
+        if (r.status === 500)
+            logger.log(
+                "fatal",
+                `${r.name || "Error"} 
+            ${r.message || "error without information"}
+            ${r.code || 0}
+            ${r.cause}`
+            )
+        return res.status(r.status).send({
+            error: r.cause || r.name || "ERROR",
+            message: r.message,
+            status: r.status,
+        })
+    }
     return res.send(r)
 
 }//todo
@@ -197,22 +231,30 @@ export const createUserCtr = async(req:Request, res:Response)=>{
   }
   newUserInfo.data.password = signPass(newUserInfo.data.password)
 
-  const newUser = await um.createUser(newUserInfo.data)
-  if("error" in newUser){
-    return res.status(newUser.status).send({
-      message: newUser.message || "something went wrong",
-      cause: newUser.code ? newUser.cause : "server internarl problem",
-      stack: newUser.stack
-    })
-  }
+  const r = await um.createUser(newUserInfo.data)
+  if ("error" in r) {
+        if (r.status === 500)
+            logger.log(
+                "fatal",
+                `${r.name || "Error"} 
+            ${r.message || "error without information"}
+            ${r.code || 0}
+            ${r.cause}`
+            )
+        return res.status(r.status).send({
+            error: r.cause || r.name || "ERROR",
+            message: r.message,
+            status: r.status,
+        })
+    }
   const data ={
-    id:newUser.id,
-    username:newUser.username,
-    email: newUser.email || "",
-    lastName: newUser.lastName || "",
-    firstName: newUser.firstName || "",
-    createAt: newUser.createdAt,
-    updateAt: newUser.updatedAt
+    id:r.id,
+    username:r.username,
+    email: r.email || "",
+    lastName: r.lastName || "",
+    firstName: r.firstName || "",
+    createAt: r.createdAt,
+    updateAt: r.updatedAt
   }
 
   return res.status(201).send({
