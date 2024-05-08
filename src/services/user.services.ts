@@ -9,8 +9,8 @@ import { checkToken } from "../utiilities/checkToken";
 import  jwt  from 'jsonwebtoken';
 import logger from "../config/logger.config";
 const um = factory.um()
-/*
 
+{{{/*
 GET /me (Ver Perfil de Usuario)
 
     Descripción: Muestra el perfil del usuario autenticado.
@@ -32,9 +32,7 @@ GET /me (Ver Perfil de Usuario)
       }
     }
 
- */
-
-    
+ }}}*/}}}
 export const getUserCtr = async(req:Request, res:Response)=>{
     const currentUser:TokenInfo | Err = checkToken(req)
     if("error" in currentUser)return res.status(currentUser.status).send({
@@ -74,8 +72,8 @@ export const getUserCtr = async(req:Request, res:Response)=>{
         data
     })
 
-}//todo
-/**PATCH /me (Editar Cuenta de Usuario)
+}
+{{{/**PATCH /me (Editar Cuenta de Usuario)
     Descripción: Permite al usuario editar su información de perfil.
     Body:
         email, firstName, lastName: Campos opcionales para actualizar.
@@ -95,7 +93,7 @@ export const getUserCtr = async(req:Request, res:Response)=>{
         "lastName": "Apellido",
         "createdAt": "2024-01-19 10:37:16-08",
         "updatedAt": "2024-01-19 11:00:16-08"
-      } */
+      } */}}}
 export const updateUserCtr = async(req:Request, res:Response)=>{
     const currentUser:TokenInfo | Err = checkToken(req)
     if("error" in currentUser)return res.status(currentUser.status).send({
@@ -146,7 +144,6 @@ export const updateUserCtr = async(req:Request, res:Response)=>{
         data
     })
 }
-//todo
 /**
 DELETE /me (Eliminar Cuenta de Usuario)
 
@@ -186,7 +183,7 @@ export const deleteUserCtr = async(req:Request, res:Response)=>{
     }
     return res.send(r)
 
-}//todo
+}
 /**
 
 POST /signup (Crear Cuenta)
@@ -305,4 +302,4 @@ export const loginUserCtr = async(req:Request, res:Response)=>{
     const secret =  dotenv.SECRET_TOKEN || ""
     const data = jwt.sign(ti, secret, {expiresIn:"1h"})
     return res.send({ok:true, data})
-}//todo
+}
