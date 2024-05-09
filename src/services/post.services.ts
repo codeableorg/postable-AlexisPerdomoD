@@ -1,9 +1,10 @@
 import { Request, Response } from "express"
-import { querySchema } from "../models/general.model"
+import { Err, Query, Res, querySchema } from "../models/general.model"
 import factory from "../dao/factory"
 import { checkToken } from "../utiilities/checkToken"
-import { postSchema } from "../models/schemas.model"
+import { Post, TokenInfo, User, postSchema } from "../models/schemas.model"
 import logger from "../config/logger.config"
+import {SafeParseReturnType } from "zod"
 const pm = factory.pm()
 const um = factory.um()
 /* 
@@ -103,9 +104,35 @@ Parámetros Query:
   }
 }
  */
-// /:username
-export const GetPostCtr = async (req: Request, res: Response) => {
-    //todo
+// /:likes
+export const getLikedPostsCtr = async (req: Request, res: Response) => {
+    const current:TokenInfo | Err = checkToken(req)
+    if("error" in current)return res.status(current.status).send({
+        error:current.cause || "Authentication Error",
+        message:current.message,
+        status:current.status
+    })
+    const q:SafeParseReturnType<typeof req.query, Query> = querySchema.safeParse(req.query)
+    if(!q.success)return res.status(400).send({
+        error: q.error.name,
+        message: q.error.message,
+        status:400
+    })
+    const user:User | Err = await um.getUser(current.username)
+     if("error" in user)return res.status(user.status).send({
+        name:user.name || "CastError",
+        message: user.message,
+        cause:user.cause,
+        status:user.status,
+    })
+    const r = await pm.getPostsLikedByUser(user, q.data)
+    if("error" in r)return res.status(r.status).send({
+        name:r.name || "Error",
+        message: r.message,
+        status: r.status,
+        cause:r.cause
+    })
+    return r
 }
 
 // POST /posts
@@ -202,7 +229,53 @@ export const createPostCtr = async (req: Request, res: Response) => {
   }
 }
  */
-export const updatePostCtr = async (req: Request, res: Response) => {} //todo
+export const updatePostCtr = async (req: Request, res: Response) => {
+    const current:TokenInfo | Err = checkToken(req)
+    if("error" in current)return res.status(current.status).send({
+        error:current.cause || "Authentication Error",
+        message:current.message,
+        status:current.status
+    })
+    const id = parseInt(req.params.id)
+    if(isNaN(id) || id < 1){
+        return res.status(400).send({
+            name:"TypeError",
+            message:"Invalid Post id"
+        })
+    }
+    if(!req.body.content || typeof req.body.content !== "string")return res.status(400).send({
+        name:"TypeError",
+        message:"content is not present or have an invalid type in the body request",
+        status:400
+    })
+    const user:User | Err = await um.getUser(current.username)
+     if("error" in user)return res.status(user.status).send({
+        name:user.name || "CastError",
+        message: user.message,
+        cause:user.cause,
+        status:user.status,
+    })
+    const post: Res<Post> | Err = await pm.getPostById(id)
+    if("error" in post)return res.status(post.status).send({
+        name: post.name || "Error",
+        message: post.message,
+        status: post.status
+    })
+    if(post.data.user_id !== user.id)return res.status(403).send({
+        name:"Authoritation Error",
+        message:"only owners can update their posts",
+        status:403
+    })
+    const r = await pm.updatePost(post.data, req.body.content)
+    if("error" in r)return res.status(r.status).send({
+        name:r.name || "Error",
+        message: r.message,
+        status: r.status,
+        cause:r.cause
+    })
+    return r
+
+}
 
 /**
 

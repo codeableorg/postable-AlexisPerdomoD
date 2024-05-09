@@ -153,7 +153,7 @@ DELETE /me (Eliminar Cuenta de Usuario)
         401 Unauthorized: Si el usuario no está autenticado.
     Ejemplo de Respuesta:
 
-    {
+    { 
       "ok": true
     }
 

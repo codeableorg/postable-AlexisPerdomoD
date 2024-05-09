@@ -10,7 +10,8 @@ export const checkToken = (req:Request):TokenInfo | Err =>{
         let token = req.headers.authorization
         if(!token)return{
             error:true,
-            message:"Unauthorized",
+            cause:"Unauthorized",
+            message:"in order to access this route you need to login",
             status:401
         }
         token = token.split(" ")[1]
@@ -29,8 +30,6 @@ export const checkToken = (req:Request):TokenInfo | Err =>{
                 cause: error.name,
                 status:400
             }
-
-
         return{
             error:true,
             message:"internar error server",

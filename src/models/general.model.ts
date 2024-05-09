@@ -2,6 +2,11 @@ import {z} from "zod";
 import { FormatedPost } from "./schemas.model";
 
 
+export type Res<T> = {
+    ok: boolean,
+    data:T
+}
+
 
 export const querySchema = z.object({
     page:z.string().default("1"),
@@ -36,3 +41,4 @@ export interface PostsResponse{
     data: FormatedPost[],
     pagination: Pagination
 }
+
